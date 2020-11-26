@@ -1,10 +1,11 @@
 import os
+import re
 #pip install pypdf2
 import PyPDF2
 import textract
 #pip install gensim
 from gensim.models import LdaMulticore, CoherenceModel
-from gensim.parsing.preprocessing import remove_stopwords, stem_text
+from gensim.parsing.preprocessing import preprocess_string
 from gensim.corpora import Dictionary as d
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
@@ -51,11 +52,16 @@ def pdf_to_token_array(filename):
         pass
         #text = textract.process(fileurl, method='tesseract', language='eng')
 
-    text = text.split()
 
-    #trim short words
-    text = [i for i in text if len(i)>5]
-    text = [i.replace(',','') for i in text]
+    text = preprocess_string(text)
+    #text = text.split()
+
+    #text = [i.replace(',','') for i in text]
+
+    # keep only alphabetical characters
+    text = [re.sub(r'[^A-Za-z]+', '', str(i)) for i in text]
+    # trim short words
+    text = [i for i in text if len(i)>3]
     # be sure to split sentence before feed into Dictionary
     dataset = [d.split() for d in text]
 
